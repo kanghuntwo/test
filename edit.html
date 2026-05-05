@@ -1,0 +1,528 @@
+<!-- Created: 2026-05-05 18:05:47 -->
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>앱 목록 편집</title>
+  <style>
+    body {
+      font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
+      padding: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+    }
+
+    .page-header .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .page-header button,
+    .page-header .btn-link {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f4f4f4;
+      cursor: pointer;
+      text-decoration: none;
+      color: #333;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .page-header button:hover,
+    .page-header .btn-link:hover {
+      background: #e8e8e8;
+    }
+
+    .page-header button.primary {
+      background: #1a73e8;
+      color: #fff;
+      border-color: #1a73e8;
+    }
+
+    .page-header button.primary:hover {
+      background: #1666cc;
+    }
+
+    .add-section {
+      display: grid;
+      grid-template-columns: 160px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fafafa;
+      margin-bottom: 16px;
+    }
+
+    .add-section input {
+      padding: 8px 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .add-section button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: 1px solid #1a73e8;
+      border-radius: 4px;
+      background: #1a73e8;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .edit-list {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .edit-list-header,
+    .edit-row {
+      display: grid;
+      grid-template-columns: 50px 36px 36px 160px 1fr auto;
+      gap: 6px;
+      align-items: center;
+      padding: 10px 12px;
+    }
+
+    .edit-row .actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .edit-list-header {
+      background: #f4f4f4;
+      font-weight: bold;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .edit-row {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .edit-row:last-child {
+      border-bottom: none;
+    }
+
+    .edit-row .num {
+      text-align: center;
+      color: #666;
+    }
+
+    .edit-row input {
+      padding: 6px 8px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .edit-row .info-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .edit-row .edit-name-input {
+      grid-column: 2 / 5;
+    }
+
+    .edit-row button {
+      padding: 4px 8px;
+      font-size: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .edit-row button.order-btn {
+      padding: 2px 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .edit-row button.order-btn:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .edit-row button.del-btn {
+      color: #d33;
+      border-color: #e9b6b6;
+    }
+
+    .edit-row button.restore-btn {
+      color: #2e7d32;
+      border-color: #b6e0bb;
+    }
+
+    .edit-row button.remove-btn {
+      color: #fff;
+      background: #d33;
+      border-color: #d33;
+    }
+
+    .edit-row button.remove-btn:hover {
+      background: #b32a2a;
+    }
+
+
+    .edit-row button.save-btn {
+      background: #1a73e8;
+      color: #fff;
+      border-color: #1a73e8;
+    }
+
+    .edit-row.deleted {
+      background: #f7f7f7;
+    }
+
+    .edit-row.deleted .name-text,
+    .edit-row.deleted .info-text {
+      color: #aaa;
+      text-decoration: line-through;
+    }
+
+    .edit-row .deleted-mark {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      font-size: 11px;
+      color: #d33;
+      border: 1px solid #e9b6b6;
+      border-radius: 3px;
+      background: #fff;
+      text-decoration: none;
+      vertical-align: middle;
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: #888;
+    }
+
+    .pagination {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      min-width: 36px;
+      padding: 6px 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: #f4f4f4;
+    }
+
+    .pagination button.active {
+      background: #1a73e8;
+      color: #fff;
+      border-color: #1a73e8;
+      font-weight: bold;
+    }
+
+    .pagination button:disabled {
+      color: #bbb;
+      cursor: not-allowed;
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background: #333;
+      color: #fff;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 0.95;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-header">
+    <h1>앱 목록 편집</h1>
+    <div class="actions">
+      <a href="index.html" class="btn-link">목록으로</a>
+      <button type="button" id="saveBtn" class="primary">저장</button>
+    </div>
+  </div>
+
+  <div class="add-section">
+    <input type="text" id="addName" placeholder="앱 명">
+    <input type="text" id="addInfo" placeholder="앱 정보">
+    <button type="button" id="addBtn">추가</button>
+  </div>
+
+  <div class="edit-list" id="editList">
+    <div class="edit-list-header">
+      <div>번호</div>
+      <div>위</div>
+      <div>아래</div>
+      <div>앱 명</div>
+      <div>앱 정보</div>
+      <div>관리</div>
+    </div>
+    <div id="editRows"></div>
+  </div>
+  <div class="pagination" id="pagination"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="apps.js"></script>
+  <script>
+    (function () {
+      const PAGE_SIZE = 10;
+
+      let apps = window.loadApps();
+      let editingIndex = -1;
+      let dirty = false;
+      let currentPage = 1;
+
+      const editRows = document.getElementById('editRows');
+      const pagination = document.getElementById('pagination');
+      const addName = document.getElementById('addName');
+      const addInfo = document.getElementById('addInfo');
+      const addBtn = document.getElementById('addBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const toast = document.getElementById('toast');
+
+      function totalPages() {
+        return Math.max(1, Math.ceil(apps.length / PAGE_SIZE));
+      }
+
+      function clampPage() {
+        const tp = totalPages();
+        if (currentPage > tp) currentPage = tp;
+        if (currentPage < 1) currentPage = 1;
+      }
+
+      function pageOfIndex(idx) {
+        return Math.floor(idx / PAGE_SIZE) + 1;
+      }
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 1600);
+      }
+
+      function render() {
+        clampPage();
+        if (apps.length === 0) {
+          editRows.innerHTML = '<div class="empty">항목이 없습니다. 위 입력창에서 새 항목을 추가하세요.</div>';
+          renderPagination();
+          return;
+        }
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageItems = apps.slice(start, end);
+
+        editRows.innerHTML = pageItems.map(function (app, offset) {
+          const idx = start + offset;
+          if (idx === editingIndex) {
+            return '<div class="edit-row" data-index="' + idx + '">' +
+              '<span class="num">' + (idx + 1) + '</span>' +
+              '<input type="text" class="edit-name-input" value="' + window.escapeHtml(app.name) + '">' +
+              '<input type="text" class="edit-info-input" value="' + window.escapeHtml(app.info) + '">' +
+              '<div class="actions">' +
+              '<button type="button" class="save-btn">저장</button>' +
+              '<button type="button" class="cancel-btn">취소</button>' +
+              '</div>' +
+              '</div>';
+          }
+          const isDeleted = !!app.deleted;
+          const upDisabled = (idx === 0 || isDeleted) ? ' disabled' : '';
+          const downDisabled = (idx === apps.length - 1 || isDeleted) ? ' disabled' : '';
+          const editDisabled = isDeleted ? ' disabled' : '';
+          const rowClass = isDeleted ? 'edit-row deleted' : 'edit-row';
+          const nameHtml = window.escapeHtml(app.name) + (isDeleted ? '<span class="deleted-mark">숨김</span>' : '');
+          const actionBtn = isDeleted
+            ? '<button type="button" class="restore-btn">표시</button>'
+            : '<button type="button" class="del-btn">숨김</button>';
+          return '<div class="' + rowClass + '" data-index="' + idx + '">' +
+            '<span class="num">' + (idx + 1) + '</span>' +
+            '<button type="button" class="order-btn up-btn" title="위로"' + upDisabled + '>&#9650;</button>' +
+            '<button type="button" class="order-btn down-btn" title="아래로"' + downDisabled + '>&#9660;</button>' +
+            '<span class="name-text">' + nameHtml + '</span>' +
+            '<span class="info-text" title="' + window.escapeHtml(app.info) + '">' + window.escapeHtml(app.info) + '</span>' +
+            '<div class="actions">' +
+            '<button type="button" class="edit-btn"' + editDisabled + '>수정</button>' +
+            actionBtn +
+            '<button type="button" class="remove-btn">삭제</button>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+        renderPagination();
+      }
+
+      function renderPagination() {
+        pagination.innerHTML = '';
+        if (apps.length === 0) return;
+        const tp = totalPages();
+
+        function addPgBtn(label, disabled, onClick, active) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = label;
+          if (disabled) b.disabled = true;
+          if (active) b.classList.add('active');
+          b.addEventListener('click', onClick);
+          pagination.appendChild(b);
+        }
+
+        addPgBtn('처음', currentPage === 1, function () { currentPage = 1; render(); });
+        addPgBtn('이전', currentPage === 1, function () { currentPage--; render(); });
+        for (let i = 1; i <= tp; i++) {
+          (function (page) {
+            addPgBtn(String(page), false, function () { currentPage = page; render(); }, page === currentPage);
+          })(i);
+        }
+        addPgBtn('다음', currentPage === tp, function () { currentPage++; render(); });
+        addPgBtn('마지막', currentPage === tp, function () { currentPage = tp; render(); });
+      }
+
+      addBtn.addEventListener('click', function () {
+        const name = addName.value.trim();
+        const info = addInfo.value.trim();
+        if (!name) {
+          alert('앱 명을 입력하세요.');
+          addName.focus();
+          return;
+        }
+        apps.push({ name: name, info: info });
+        addName.value = '';
+        addInfo.value = '';
+        dirty = true;
+        currentPage = totalPages();
+        render();
+        addName.focus();
+      });
+
+      editRows.addEventListener('click', function (e) {
+        const row = e.target.closest('.edit-row');
+        if (!row) return;
+        const idx = parseInt(row.dataset.index, 10);
+
+        if (e.target.classList.contains('up-btn')) {
+          if (idx > 0) {
+            const tmp = apps[idx - 1];
+            apps[idx - 1] = apps[idx];
+            apps[idx] = tmp;
+            dirty = true;
+            currentPage = pageOfIndex(idx - 1);
+            render();
+          }
+        } else if (e.target.classList.contains('down-btn')) {
+          if (idx < apps.length - 1) {
+            const tmp = apps[idx + 1];
+            apps[idx + 1] = apps[idx];
+            apps[idx] = tmp;
+            dirty = true;
+            currentPage = pageOfIndex(idx + 1);
+            render();
+          }
+        } else if (e.target.classList.contains('edit-btn')) {
+          editingIndex = idx;
+          render();
+        } else if (e.target.classList.contains('del-btn')) {
+          apps[idx].deleted = true;
+          if (editingIndex === idx) editingIndex = -1;
+          dirty = true;
+          render();
+        } else if (e.target.classList.contains('restore-btn')) {
+          apps[idx].deleted = false;
+          dirty = true;
+          render();
+        } else if (e.target.classList.contains('remove-btn')) {
+          if (confirm('"' + apps[idx].name + '" 항목을 완전히 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) {
+            apps.splice(idx, 1);
+            if (editingIndex === idx) editingIndex = -1;
+            else if (editingIndex > idx) editingIndex--;
+            dirty = true;
+            render();
+          }
+        } else if (e.target.classList.contains('save-btn')) {
+          const nameVal = row.querySelector('.edit-name-input').value.trim();
+          const infoVal = row.querySelector('.edit-info-input').value.trim();
+          if (!nameVal) {
+            alert('앱 명을 입력하세요.');
+            return;
+          }
+          apps[idx] = { name: nameVal, info: infoVal };
+          editingIndex = -1;
+          dirty = true;
+          render();
+        } else if (e.target.classList.contains('cancel-btn')) {
+          editingIndex = -1;
+          render();
+        }
+      });
+
+      saveBtn.addEventListener('click', function () {
+        if (editingIndex !== -1) {
+          alert('수정 중인 항목을 먼저 저장하거나 취소해 주세요.');
+          return;
+        }
+        try {
+          window.saveApps(apps);
+          dirty = false;
+          showToast('저장되었습니다.');
+        } catch (e) {
+          alert('저장에 실패했습니다: ' + e.message);
+        }
+      });
+
+      window.addEventListener('beforeunload', function (e) {
+        if (dirty) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+
+</html>
